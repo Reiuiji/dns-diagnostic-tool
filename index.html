@@ -431,6 +431,24 @@
         .resolver-info h3 {
             font-size: 1.1rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .map-shortcut {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .map-shortcut:hover {
+            color: var(--accent-primary) !important;
+            transform: scale(1.15);
         }
 
         .resolver-info p {
@@ -898,6 +916,27 @@
         const modalAuthorities = document.getElementById("modal-authorities");
         const modalAdditionals = document.getElementById("modal-additionals");
 
+        // Focus map on a specific resolver
+        window.focusOnMap = (index, event) => {
+            if (event) event.stopPropagation();
+            
+            const res = activeResolvers[index];
+            if (!res || res.lat === undefined || res.lon === undefined) return;
+            
+            const mapWrapper = document.querySelector(".map-wrapper");
+            if (mapWrapper) {
+                mapWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            const marker = mapMarkers[index];
+            if (marker && map) {
+                setTimeout(() => {
+                    map.setView([res.lat, res.lon], 5);
+                    marker.openPopup();
+                }, 300);
+            }
+        };
+
         // Render Cards
         function renderCards() {
             container.innerHTML = "";
@@ -910,7 +949,12 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="resolver-info">
-                            <h3>${res.name}</h3>
+                            <h3>
+                                ${res.name}
+                                <span class="map-shortcut" onclick="focusOnMap(${index}, event)" title="Show on map">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                </span>
+                            </h3>
                             <p>${res.desc} — <code>${res.ip}</code></p>
                         </div>
                         <span class="badge badge-pending" id="badge-${index}">Idle</span>
