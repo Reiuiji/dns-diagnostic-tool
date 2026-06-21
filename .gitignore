@@ -1,0 +1,12 @@
+# Python temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Agent temporary execution files and logs
+.agents/
+ag_output_*.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db
