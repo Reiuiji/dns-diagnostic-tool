@@ -16,5 +16,15 @@
   { "name": "GreenNet", "ip": "81.187.96.109", "desc": "United Kingdom", "lat": 51.5074, "lon": -0.1278, "country": "United Kingdom" },
   { "name": "Sunet DNS", "ip": "192.36.125.150", "desc": "Sweden (Academic)", "lat": 59.3293, "lon": 18.0686, "country": "Sweden" },
   { "name": "TIM Resolver", "ip": "85.37.17.15", "desc": "Italy ISP", "lat": 41.9028, "lon": 12.4964, "country": "Italy" },
-  { "name": "Telefonica", "ip": "80.58.61.250", "desc": "Spain ISP", "lat": 40.4168, "lon": -3.7038, "country": "Spain" }
+  { "name": "Telefonica", "ip": "80.58.61.250", "desc": "Spain ISP", "lat": 40.4168, "lon": -3.7038, "country": "Spain" },
+  { "name": "Telstra DNS", "ip": "61.9.133.193", "desc": "Australia ISP", "lat": -33.8688, "lon": 151.2093, "country": "Australia" },
+  { "name": "Optus DNS", "ip": "202.139.83.3", "desc": "Australia ISP", "lat": -37.8136, "lon": 144.9631, "country": "Australia" },
+  { "name": "Spark NZ DNS", "ip": "122.56.250.1", "desc": "New Zealand ISP", "lat": -36.8485, "lon": 174.7633, "country": "New Zealand" },
+  { "name": "One NZ DNS", "ip": "203.109.129.7", "desc": "New Zealand ISP", "lat": -41.2865, "lon": 174.7762, "country": "New Zealand" },
+  { "name": "IIJ DNS", "ip": "202.232.2.2", "desc": "Japan Backbone", "lat": 35.6762, "lon": 139.6503, "country": "Japan" },
+  { "name": "SoftBank DNS", "ip": "210.140.10.1", "desc": "Japan ISP", "lat": 35.6528, "lon": 139.8394, "country": "Japan" },
+  { "name": "114 DNS", "ip": "114.114.114.114", "desc": "China Primary", "lat": 32.0603, "lon": 118.7969, "country": "China" },
+  { "name": "Alibaba Cloud DNS", "ip": "223.5.5.5", "desc": "China Anycast", "lat": 30.2741, "lon": 120.1551, "country": "China" },
+  { "name": "Baidu DNS", "ip": "180.76.76.76", "desc": "China Anycast", "lat": 39.9042, "lon": 116.4074, "country": "China" },
+  { "name": "DNSPod / Tencent", "ip": "119.29.29.29", "desc": "China Anycast", "lat": 22.5431, "lon": 114.0579, "country": "China" }
 ]
