@@ -854,8 +854,12 @@
                     
                     marker.bindPopup(popupContent);
 
+                    let popupWasOpen = false;
+                    marker.on('preclick', () => {
+                        popupWasOpen = marker.isPopupOpen();
+                    });
                     marker.on('click', () => {
-                        if (marker.isPopupOpen()) {
+                        if (popupWasOpen) {
                             scrollToCard(index);
                         }
                     });
