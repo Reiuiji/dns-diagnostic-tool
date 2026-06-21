@@ -787,7 +787,7 @@
         </header>
 
         <!-- Search Form panel -->
-        <div class="glass-panel">
+        <div class="glass-panel" style="position: relative; z-index: 1200;">
             <div class="search-form">
                 <div class="input-group">
                     <label for="domain-input">Domain Name</label>
@@ -1048,6 +1048,24 @@
 
         let selectedIPs = new Set();
 
+        function onSelectionChange() {
+            activeResolvers = publicResolvers.filter(res => selectedIPs.has(res.ip));
+            renderCards();
+            
+            const states = {};
+            activeResolvers.forEach(res => {
+                const data = queryResults[res.ip];
+                if (data) {
+                    if (data.error) states[res.ip] = 'error';
+                    else states[res.ip] = data.time_ms < 120 ? 'fast' : 'slow';
+                } else {
+                    states[res.ip] = 'idle';
+                }
+            });
+            updateMapMarkers(states);
+            updateStats();
+        }
+
         function initDropdown() {
             // Initially select all resolvers
             selectedIPs = new Set(publicResolvers.map(r => r.ip));
@@ -1105,6 +1123,7 @@
                 publicResolvers.forEach(res => selectedIPs.add(res.ip));
                 syncCheckboxes();
                 updateDropdownHeader();
+                onSelectionChange();
             };
 
             // Select Matching Button
@@ -1121,6 +1140,7 @@
                 });
                 syncCheckboxes();
                 updateDropdownHeader();
+                onSelectionChange();
             };
 
             // Clear All Button
@@ -1129,6 +1149,7 @@
                 selectedIPs.clear();
                 syncCheckboxes();
                 updateDropdownHeader();
+                onSelectionChange();
             };
         }
 
@@ -1151,6 +1172,7 @@
                         selectedIPs.delete(res.ip);
                     }
                     updateDropdownHeader();
+                    onSelectionChange();
                 };
 
                 const label = document.createElement("label");
@@ -1192,6 +1214,7 @@
                 activeResolvers = [...publicResolvers];
                 renderCards();
                 initMap();
+                onSelectionChange();
             } catch (err) {
                 console.error("Failed to load resolvers:", err);
                 container.innerHTML = `<div style="color: var(--color-error); text-align: center; width: 100%; padding: 2rem;">Failed to load resolvers configuration file.</div>`;
