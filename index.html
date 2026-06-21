@@ -126,9 +126,146 @@
         /* Search form styling */
         .search-form {
             display: grid;
-            grid-template-columns: 1fr auto auto auto;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.25rem;
+            align-items: flex-end;
+        }
+
+        /* Multiselect Dropdown */
+        .multiselect-dropdown {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .multiselect-header {
+            padding: 0.85rem 1.2rem;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            color: var(--text-main);
+        }
+
+        .multiselect-header svg {
+            transition: transform 0.2s ease;
+        }
+
+        .multiselect-dropdown.open .multiselect-header svg {
+            transform: rotate(180deg);
+        }
+
+        .multiselect-dropdown.open {
+            border-color: var(--accent-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .multiselect-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            min-width: 280px;
+            background: #0f111a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .panel-search input {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--panel-border);
+            padding: 0.55rem 0.85rem;
+            font-size: 0.85rem;
+        }
+
+        .panel-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.5rem;
+        }
+
+        .btn-panel-action {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-panel-action:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            padding-right: 0.25rem;
+        }
+
+        .resolver-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .resolver-option:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .resolver-option input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        .resolver-option label {
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .resolver-option label span {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: normal;
         }
 
         .input-group {
@@ -668,6 +805,28 @@
                         <option value="SOA">SOA (Start of Authority)</option>
                     </select>
                 </div>
+                <div class="input-group" style="position: relative;">
+                    <label>Target Resolvers</label>
+                    <div class="multiselect-dropdown" id="resolver-dropdown">
+                        <div class="multiselect-header" id="dropdown-header">
+                            <span>All Resolvers (28)</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="multiselect-panel" id="dropdown-panel" style="display: none;">
+                            <div class="panel-search" onclick="event.stopPropagation()">
+                                <input type="text" id="panel-search-input" placeholder="Search name/country...">
+                            </div>
+                            <div class="panel-actions">
+                                <button type="button" class="btn-panel-action" id="btn-select-all">Select All</button>
+                                <button type="button" class="btn-panel-action" id="btn-select-filtered" style="display: none;">Select Matching</button>
+                                <button type="button" class="btn-panel-action" id="btn-clear-all">Clear All</button>
+                            </div>
+                            <div class="panel-list" id="dropdown-list" onclick="event.stopPropagation()">
+                                <!-- Checkboxes will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="input-group">
                     <label for="custom-server">Custom Server (Optional)</label>
                     <input type="text" id="custom-server" placeholder="e.g. 8.8.8.8">
@@ -887,10 +1046,149 @@
             });
         }
 
+        let selectedIPs = new Set();
+
+        function initDropdown() {
+            // Initially select all resolvers
+            selectedIPs = new Set(publicResolvers.map(r => r.ip));
+            updateDropdownHeader();
+            renderDropdownList();
+
+            const dropdown = document.getElementById("resolver-dropdown");
+            const panel = document.getElementById("dropdown-panel");
+            const searchInput = document.getElementById("panel-search-input");
+
+            // Toggle dropdown open/close
+            dropdown.onclick = (e) => {
+                if (panel.contains(e.target) && e.target !== searchInput) return;
+                dropdown.classList.toggle("open");
+                panel.style.display = dropdown.classList.contains("open") ? "flex" : "none";
+            };
+
+            // Close dropdown if clicked outside
+            document.addEventListener("click", (e) => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove("open");
+                    panel.style.display = "none";
+                }
+            });
+
+            // Search/Filter list in panel
+            searchInput.oninput = () => {
+                const query = searchInput.value.toLowerCase();
+                let matchCount = 0;
+
+                publicResolvers.forEach((res, idx) => {
+                    const item = document.getElementById(`opt-item-${idx}`);
+                    if (item) {
+                        const match = res.name.toLowerCase().includes(query) || 
+                                      res.ip.includes(query) || 
+                                      (res.country && res.country.toLowerCase().includes(query));
+                        item.style.display = match ? "flex" : "none";
+                        if (match) matchCount++;
+                    }
+                });
+
+                // Toggle "Select Matching" visibility
+                const btnSelectFiltered = document.getElementById("btn-select-filtered");
+                if (query) {
+                    btnSelectFiltered.style.display = "block";
+                    btnSelectFiltered.textContent = `Select Matching (${matchCount})`;
+                } else {
+                    btnSelectFiltered.style.display = "none";
+                }
+            };
+
+            // Select All Button
+            document.getElementById("btn-select-all").onclick = (e) => {
+                e.stopPropagation();
+                publicResolvers.forEach(res => selectedIPs.add(res.ip));
+                syncCheckboxes();
+                updateDropdownHeader();
+            };
+
+            // Select Matching Button
+            document.getElementById("btn-select-filtered").onclick = (e) => {
+                e.stopPropagation();
+                const query = searchInput.value.toLowerCase();
+                publicResolvers.forEach(res => {
+                    const match = res.name.toLowerCase().includes(query) || 
+                                  res.ip.includes(query) || 
+                                  (res.country && res.country.toLowerCase().includes(query));
+                    if (match) {
+                        selectedIPs.add(res.ip);
+                    }
+                });
+                syncCheckboxes();
+                updateDropdownHeader();
+            };
+
+            // Clear All Button
+            document.getElementById("btn-clear-all").onclick = (e) => {
+                e.stopPropagation();
+                selectedIPs.clear();
+                syncCheckboxes();
+                updateDropdownHeader();
+            };
+        }
+
+        function renderDropdownList() {
+            const list = document.getElementById("dropdown-list");
+            list.innerHTML = "";
+            publicResolvers.forEach((res, index) => {
+                const item = document.createElement("div");
+                item.className = "resolver-option";
+                item.id = `opt-item-${index}`;
+                
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = `chk-${index}`;
+                checkbox.checked = selectedIPs.has(res.ip);
+                checkbox.onchange = (e) => {
+                    if (checkbox.checked) {
+                        selectedIPs.add(res.ip);
+                    } else {
+                        selectedIPs.delete(res.ip);
+                    }
+                    updateDropdownHeader();
+                };
+
+                const label = document.createElement("label");
+                label.htmlFor = `chk-${index}`;
+                label.innerHTML = `<strong>${res.name}</strong> <span>${res.country || 'Global'} (${res.ip})</span>`;
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                list.appendChild(item);
+            });
+        }
+
+        function syncCheckboxes() {
+            publicResolvers.forEach((res, index) => {
+                const checkbox = document.getElementById(`chk-${index}`);
+                if (checkbox) {
+                    checkbox.checked = selectedIPs.has(res.ip);
+                }
+            });
+        }
+
+        function updateDropdownHeader() {
+            const headerText = document.querySelector("#dropdown-header span");
+            if (selectedIPs.size === publicResolvers.length) {
+                headerText.textContent = `All Resolvers (${publicResolvers.length})`;
+            } else {
+                headerText.textContent = `${selectedIPs.size} Resolver${selectedIPs.size === 1 ? '' : 's'} Selected`;
+            }
+        }
+
         async function loadResolvers() {
             try {
                 const response = await fetch('/resolvers.json');
                 publicResolvers = await response.json();
+                
+                // Initialize multiselect dropdown
+                initDropdown();
+
                 activeResolvers = [...publicResolvers];
                 renderCards();
                 initMap();
@@ -1033,11 +1331,17 @@
                 return;
             }
 
-            // Build dynamic resolver list
-            let targetResolvers = [...publicResolvers];
+            // Build dynamic resolver list from selected checkboxes
+            let targetResolvers = publicResolvers.filter(res => selectedIPs.has(res.ip));
             if (customServer) {
                 targetResolvers = [{ name: "Custom User DNS", ip: customServer, desc: "User Defined", lat: 39, lon: -34, country: "Custom Location" }, ...targetResolvers];
             }
+            
+            if (targetResolvers.length === 0) {
+                alert("Please select at least one resolver to test.");
+                return;
+            }
+            
             activeResolvers = targetResolvers;
             renderCards();
 
