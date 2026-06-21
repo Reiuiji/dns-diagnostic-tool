@@ -26,5 +26,6 @@
   { "name": "114 DNS", "ip": "114.114.114.114", "desc": "China Primary", "lat": 32.0603, "lon": 118.7969, "country": "China" },
   { "name": "Alibaba Cloud DNS", "ip": "223.5.5.5", "desc": "China Anycast", "lat": 30.2741, "lon": 120.1551, "country": "China" },
   { "name": "Baidu DNS", "ip": "180.76.76.76", "desc": "China Anycast", "lat": 39.9042, "lon": 116.4074, "country": "China" },
-  { "name": "DNSPod / Tencent", "ip": "119.29.29.29", "desc": "China Anycast", "lat": 22.5431, "lon": 114.0579, "country": "China" }
+  { "name": "DNSPod / Tencent", "ip": "119.29.29.29", "desc": "China Anycast", "lat": 22.5431, "lon": 114.0579, "country": "China" },
+  { "name": "Vodafone Australia", "ip": "202.12.144.15", "desc": "Mobile Network", "lat": -33.8688, "lon": 151.2093, "country": "Australia" }
 ]
