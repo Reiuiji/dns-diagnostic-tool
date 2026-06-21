@@ -12,8 +12,14 @@ import argparse
 PORT = 8000
 
 # DNS Query building and parsing functions
-def build_query(domain, qtype=1):
-    header = struct.pack('!HHHHHH', 0x1234, 0x0100, 1, 0, 0, 0)
+def build_query(domain, qtype=1, subnet_ip=None, prefix_len=0):
+    if subnet_ip and prefix_len > 0:
+        # Header: 1 question, 1 additional record (the OPT RR)
+        header = struct.pack('!HHHHHH', 0x1234, 0x0100, 1, 0, 0, 1)
+    else:
+        # Header: 1 question, 0 additional records
+        header = struct.pack('!HHHHHH', 0x1234, 0x0100, 1, 0, 0, 0)
+        
     question = b''
     for part in domain.split('.'):
         if not part:
@@ -21,6 +27,21 @@ def build_query(domain, qtype=1):
         question += bytes([len(part)]) + part.encode('utf-8')
     question += b'\x00'
     question += struct.pack('!HH', qtype, 1)
+    
+    if subnet_ip and prefix_len > 0:
+        try:
+            parts = [int(x) for x in subnet_ip.split('.')]
+            addr_bytes = bytes(parts[:(prefix_len + 7) // 8])
+            # Option: Family=1 (IPv4), SourcePrefixLen, ScopePrefixLen=0, Address
+            ecs_option_data = struct.pack('!HBB', 1, prefix_len, 0) + addr_bytes
+            # Option Code = 8 (ECS), Length
+            ecs_option = struct.pack('!HH', 8, len(ecs_option_data)) + ecs_option_data
+            # OPT RR: Name=0, Type=OPT (41), PayloadSize=4096, ExtRCODE=0, Version=0, Flags=0, DataLen
+            opt_rr = struct.pack('!BHHHIH', 0, 41, 4096, 0, 0, len(ecs_option)) + ecs_option
+            return header + question + opt_rr
+        except Exception:
+            pass
+            
     return header + question
 
 def parse_name(data, offset):
@@ -138,8 +159,8 @@ def parse_response(data):
         "additionals": additionals
     }
 
-def query_server(server_ip, domain, qtype=1, timeout=3.0):
-    query_packet = build_query(domain, qtype)
+def query_server(server_ip, domain, qtype=1, timeout=3.0, subnet_ip=None, prefix_len=0):
+    query_packet = build_query(domain, qtype, subnet_ip, prefix_len)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
     start_time = time.time()
@@ -166,6 +187,8 @@ class DNSDiagnosticHTTPHandler(http.server.BaseHTTPRequestHandler):
             domain = query_params.get("domain", [""])[0]
             qtype_str = query_params.get("type", ["A"])[0]
             server_ip = query_params.get("server", ["8.8.8.8"])[0]
+            subnet_ip = query_params.get("subnet", [None])[0]
+            prefix_str = query_params.get("prefix", ["0"])[0]
             
             qtype_map = {
                 "A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "MX": 15, "TXT": 16, "AAAA": 28, "ANY": 255
@@ -175,6 +198,11 @@ class DNSDiagnosticHTTPHandler(http.server.BaseHTTPRequestHandler):
             except ValueError:
                 qtype = qtype_map.get(qtype_str.upper(), 1)
                 
+            try:
+                prefix_len = int(prefix_str)
+            except ValueError:
+                prefix_len = 0
+                
             if not domain:
                 self.send_response(400)
                 self.send_header("Content-Type", "application/json")
@@ -183,7 +211,7 @@ class DNSDiagnosticHTTPHandler(http.server.BaseHTTPRequestHandler):
                 return
                 
             # Perform query
-            result = query_server(server_ip, domain, qtype)
+            result = query_server(server_ip, domain, qtype, subnet_ip=subnet_ip, prefix_len=prefix_len)
             
             self.send_response(200)
             self.send_header("Content-Type", "application/json")

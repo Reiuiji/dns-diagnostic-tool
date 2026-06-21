@@ -7,11 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <style>
         :root {
             color-scheme: dark;
             --bg-color: #08090f;
-            --panel-bg: rgba(20, 22, 37, 0.4);
+            --panel-bg: rgba(20, 22, 37, 0.45);
             --panel-border: rgba(255, 255, 255, 0.08);
             --accent-primary: #8b5cf6;
             --accent-secondary: #6366f1;
@@ -33,8 +38,8 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-                radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+                radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.04) 0px, transparent 50%);
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
@@ -103,7 +108,6 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        /* Glassmorphic Panel styling */
         .glass-panel {
             background: var(--panel-bg);
             backdrop-filter: blur(16px);
@@ -123,7 +127,7 @@
         .search-form {
             display: grid;
             grid-template-columns: 1fr auto auto auto;
-            gap: 1rem;
+            gap: 1.25rem;
             align-items: center;
         }
 
@@ -194,6 +198,151 @@
             transform: translateY(0);
         }
 
+        /* Stats Panel */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(139, 92, 246, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Map styling */
+        .map-wrapper {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 18px;
+            padding: 1rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            height: 380px;
+            width: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        /* Leaflet Dark Mode Overrides */
+        .leaflet-container {
+            background-color: #0b0c13 !important;
+            font-family: inherit;
+        }
+
+        .leaflet-bar {
+            border: 1px solid var(--panel-border) !important;
+            box-shadow: none !important;
+        }
+
+        .leaflet-bar a {
+            background-color: #0f111a !important;
+            color: var(--text-main) !important;
+            border-bottom: 1px solid var(--panel-border) !important;
+            transition: background-color 0.2s;
+        }
+
+        .leaflet-bar a:hover {
+            background-color: #1a1d2e !important;
+            color: #fff !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #0f111a !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--panel-border) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+            padding: 4px !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #0f111a !important;
+            border: 1px solid var(--panel-border) !important;
+        }
+
+        /* Custom Glowing Status Map Pins */
+        .custom-map-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pin-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 8px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .pin-glow {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            animation: pin-pulse 2s infinite ease-out;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pin-pulse {
+            0% { transform: scale(0.6); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+
+        .pin-state-idle .pin-dot { background-color: #a8a29e; }
+        .pin-state-idle .pin-glow { background-color: rgba(168, 162, 158, 0.35); }
+
+        .pin-state-querying .pin-dot { background-color: var(--accent-secondary); }
+        .pin-state-querying .pin-glow { background-color: rgba(99, 102, 241, 0.5); }
+
+        .pin-state-fast .pin-dot { background-color: var(--color-success); }
+        .pin-state-fast .pin-glow { background-color: rgba(16, 185, 129, 0.5); }
+
+        .pin-state-slow .pin-dot { background-color: var(--color-warning); }
+        .pin-state-slow .pin-glow { background-color: rgba(245, 158, 11, 0.5); }
+
+        .pin-state-error .pin-dot { background-color: var(--color-error); }
+        .pin-state-error .pin-glow { background-color: rgba(239, 68, 68, 0.5); }
+
         /* Results dashboard grid */
         .results-section {
             display: flex;
@@ -205,6 +354,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .section-header h2 {
@@ -508,13 +659,64 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
             </div>
+            
+            <!-- Advanced EDNS Client Subnet (ECS) Options Toggle -->
+            <div class="advanced-toggle-container" style="margin-top: 1.25rem;">
+                <button id="btn-advanced-toggle" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; transition: color 0.2s; outline: none;">
+                    <svg id="advanced-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    Advanced DNS Settings (EDNS Client Subnet)
+                </button>
+            </div>
+            
+            <!-- Advanced Panel -->
+            <div id="advanced-panel" style="display: none; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--panel-border);">
+                <div class="input-group">
+                    <label for="ecs-subnet">ECS Client Subnet IP (IPv4)</label>
+                    <input type="text" id="ecs-subnet" placeholder="e.g. 198.51.100.0">
+                </div>
+                <div class="input-group">
+                    <label for="ecs-prefix">ECS Prefix Length (1-32)</label>
+                    <input type="number" id="ecs-prefix" placeholder="e.g. 24" min="1" max="32" value="24">
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Summary Panel (initially hidden) -->
+        <div class="stats-panel" id="stats-panel" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-success-rate">--</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-avg-latency">-- ms</div>
+                <div class="stat-label">Avg Latency</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-fastest">--</div>
+                <div class="stat-label">Fastest Resolver</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-slowest">--</div>
+                <div class="stat-label">Slowest Resolver</div>
+            </div>
+        </div>
+
+        <!-- Interactive Map Wrapper -->
+        <div class="map-wrapper">
+            <div id="map"></div>
         </div>
 
         <!-- Dashboard Dashboard grid section -->
         <div class="results-section">
             <div class="section-header">
                 <h2>Resolver Diagnostics</h2>
-                <input type="text" id="filter-resolver" class="search-resolver" placeholder="Filter resolvers by name/IP...">
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    <button class="btn-export" id="btn-export" disabled style="background: rgba(255,255,255,0.04); border: 1px solid var(--panel-border); border-radius: 8px; color: var(--text-main); padding: 0.55rem 1.1rem; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.35rem; font-family: inherit; font-weight: 500;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export JSON
+                    </button>
+                    <input type="text" id="filter-resolver" class="search-resolver" placeholder="Filter resolvers by name/IP/country...">
+                </div>
             </div>
             <div class="resolver-grid" id="resolvers-container">
                 <!-- Resolver Cards will be dynamically rendered here -->
@@ -549,6 +751,109 @@
         let publicResolvers = [];
         let activeResolvers = [];
         let queryResults = {};
+        let map;
+        let mapMarkers = [];
+
+        // Advanced Toggle
+        const btnAdvancedToggle = document.getElementById("btn-advanced-toggle");
+        const advancedPanel = document.getElementById("advanced-panel");
+        const advancedChevron = document.getElementById("advanced-chevron");
+
+        btnAdvancedToggle.onclick = () => {
+            if (advancedPanel.style.display === "none") {
+                advancedPanel.style.display = "grid";
+                advancedChevron.style.transform = "rotate(180deg)";
+            } else {
+                advancedPanel.style.display = "none";
+                advancedChevron.style.transform = "rotate(0deg)";
+            }
+        };
+
+        // Initialize Map
+        function initMap() {
+            try {
+                map = L.map('map', {
+                    center: [45, 5],
+                    zoom: 2,
+                    minZoom: 1,
+                    maxZoom: 12,
+                    zoomControl: true,
+                    attributionControl: true
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }).addTo(map);
+
+                updateMapMarkers();
+            } catch (err) {
+                console.error("Leaflet map initialization failed:", err);
+            }
+        }
+
+        // Draw Custom Glowing Pins on Map
+        function updateMapMarkers(states = {}) {
+            if (!map) return;
+
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            activeResolvers.forEach((res, index) => {
+                if (res.lat !== undefined && res.lon !== undefined) {
+                    const state = states[res.ip] || 'idle';
+                    
+                    const pinIcon = L.divIcon({
+                        className: `custom-map-pin pin-state-${state}`,
+                        html: `<div class="pin-glow"></div><div class="pin-dot"></div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+
+                    const marker = L.marker([res.lat, res.lon], { icon: pinIcon }).addTo(map);
+                    
+                    let popupContent = `
+                        <div style="font-family: 'Outfit', sans-serif; color: #f3f4f6; font-size: 0.9rem; padding: 4px; min-width: 180px;">
+                            <strong style="color: #8b5cf6; font-size: 0.95rem;">${res.name}</strong><br/>
+                            <span style="font-size: 0.75rem; color: #9ca3af; display: inline-block; margin-top: 2px;">${res.country || 'Global'}</span><br/>
+                            <code style="font-size: 0.8rem; color: #d1d5db; display: block; margin-top: 4px; background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; width: fit-content;">${res.ip}</code>
+                    `;
+
+                    const data = queryResults[res.ip];
+                    if (data) {
+                        if (data.error) {
+                            popupContent += `<span style="color: var(--color-error); font-size: 0.75rem; font-weight: 600; display: block; margin-top: 6px;">Error: ${data.error}</span>`;
+                        } else {
+                            popupContent += `
+                                <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 2px;">
+                                    <div><strong>Latency:</strong> ${data.time_ms} ms</div>
+                                    <div><strong>RCODE:</strong> ${data.rcode_name}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                    popupContent += `</div>`;
+                    
+                    marker.bindPopup(popupContent);
+
+                    marker.on('click', () => {
+                        const card = document.getElementById(`card-${index}`);
+                        if (card) {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            card.style.borderColor = 'var(--accent-primary)';
+                            card.style.boxShadow = '0 0 20px rgba(139, 92, 246, 0.3)';
+                            setTimeout(() => {
+                                card.style.borderColor = '';
+                                card.style.boxShadow = '';
+                            }, 2000);
+                        }
+                    });
+
+                    mapMarkers.push(marker);
+                }
+            });
+        }
 
         async function loadResolvers() {
             try {
@@ -556,6 +861,7 @@
                 publicResolvers = await response.json();
                 activeResolvers = [...publicResolvers];
                 renderCards();
+                initMap();
             } catch (err) {
                 console.error("Failed to load resolvers:", err);
                 container.innerHTML = `<div style="color: var(--color-error); text-align: center; width: 100%; padding: 2rem;">Failed to load resolvers configuration file.</div>`;
@@ -568,6 +874,7 @@
         const customServerInput = document.getElementById("custom-server");
         const btnResolve = document.getElementById("btn-resolve");
         const filterInput = document.getElementById("filter-resolver");
+        const btnExport = document.getElementById("btn-export");
 
         const modal = document.getElementById("detail-modal");
         const modalClose = document.getElementById("modal-close");
@@ -606,11 +913,62 @@
             });
         }
 
+        // Aggregate statistics
+        function updateStats() {
+            const statsPanel = document.getElementById("stats-panel");
+            const successEl = document.getElementById("stat-success-rate");
+            const avgLatencyEl = document.getElementById("stat-avg-latency");
+            const fastestEl = document.getElementById("stat-fastest");
+            const slowestEl = document.getElementById("stat-slowest");
+            
+            let total = 0;
+            let successCount = 0;
+            let totalLatency = 0;
+            let fastest = { name: "--", time: Infinity };
+            let slowest = { name: "--", time: -Infinity };
+
+            activeResolvers.forEach(res => {
+                const data = queryResults[res.ip];
+                if (data) {
+                    total++;
+                    if (!data.error) {
+                        successCount++;
+                        totalLatency += data.time_ms;
+                        if (data.time_ms < fastest.time) {
+                            fastest = { name: res.name, time: data.time_ms };
+                        }
+                        if (data.time_ms > slowest.time) {
+                            slowest = { name: res.name, time: data.time_ms };
+                        }
+                    }
+                }
+            });
+
+            if (total === 0) {
+                statsPanel.style.display = "none";
+                return;
+            }
+
+            statsPanel.style.display = "grid";
+            const successRate = Math.round((successCount / total) * 100);
+            successEl.textContent = `${successRate}%`;
+            successEl.style.color = successRate > 80 ? "var(--color-success)" : (successRate > 50 ? "var(--color-warning)" : "var(--color-error)");
+
+            const avgLatency = successCount > 0 ? Math.round(totalLatency / successCount) : 0;
+            avgLatencyEl.textContent = `${avgLatency} ms`;
+            avgLatencyEl.style.color = avgLatency < 100 ? "var(--color-success)" : "var(--color-warning)";
+
+            fastestEl.textContent = fastest.name !== "--" ? `${fastest.name} (${fastest.time} ms)` : "--";
+            slowestEl.textContent = slowest.name !== "--" ? `${slowest.name} (${slowest.time} ms)` : "--";
+        }
+
         // Run Queries
         async function runQueries() {
             const domain = domainInput.value.trim();
             const qtype = typeSelect.value;
             const customServer = customServerInput.value.trim();
+            const ecsSubnet = document.getElementById("ecs-subnet").value.trim();
+            const ecsPrefix = document.getElementById("ecs-prefix").value.trim();
 
             if (!domain) {
                 alert("Please enter a domain name.");
@@ -620,13 +978,19 @@
             // Build dynamic resolver list
             let targetResolvers = [...publicResolvers];
             if (customServer) {
-                targetResolvers = [{ name: "Custom User DNS", ip: customServer, desc: "User Defined" }, ...targetResolvers];
+                targetResolvers = [{ name: "Custom User DNS", ip: customServer, desc: "User Defined", lat: 39, lon: -34, country: "Custom Location" }, ...targetResolvers];
             }
             activeResolvers = targetResolvers;
             renderCards();
 
+            // Set all pins to querying on map
+            const states = {};
+            activeResolvers.forEach(res => states[res.ip] = 'querying');
+            updateMapMarkers(states);
+
             btnResolve.disabled = true;
             btnResolve.querySelector("span").textContent = "Resolving...";
+            btnExport.disabled = true;
 
             const fetchQueue = activeResolvers.map(async (res, index) => {
                 const card = document.getElementById(`card-${index}`);
@@ -635,53 +999,88 @@
                 const rcodeEl = document.getElementById(`rcode-${index}`);
                 const recordsEl = document.getElementById(`records-${index}`);
 
-                card.classList.add("running");
-                badge.className = "badge badge-pending";
-                badge.textContent = "Querying";
+                if (card) card.classList.add("running");
+                if (badge) {
+                    badge.className = "badge badge-pending";
+                    badge.textContent = "Querying";
+                }
 
                 try {
-                    const response = await fetch(`/api/query?domain=${encodeURIComponent(domain)}&type=${qtype}&server=${res.ip}`);
+                    let url = `/api/query?domain=${encodeURIComponent(domain)}&type=${qtype}&server=${res.ip}`;
+                    if (ecsSubnet && ecsPrefix) {
+                        url += `&subnet=${encodeURIComponent(ecsSubnet)}&prefix=${encodeURIComponent(ecsPrefix)}`;
+                    }
+
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error("HTTP Error");
                     const data = await response.json();
                     
                     queryResults[res.ip] = data;
-                    card.classList.remove("running");
+                    if (card) card.classList.remove("running");
 
                     if (data.error) {
-                        badge.className = "badge badge-error";
-                        badge.textContent = "Error";
-                        latencyEl.textContent = `${data.time_ms} ms`;
-                        latencyEl.className = "latency slow";
-                        rcodeEl.textContent = "TIMEOUT";
-                        recordsEl.innerHTML = `<div class="record-item" style="color: var(--color-error);">${data.error}</div>`;
-                    } else {
-                        badge.className = "badge badge-success";
-                        badge.textContent = "Success";
-                        
-                        latencyEl.textContent = `${data.time_ms} ms`;
-                        latencyEl.className = data.time_ms < 100 ? "latency fast" : "latency slow";
-                        rcodeEl.textContent = data.rcode_name;
-
-                        if (data.answers && data.answers.length > 0) {
-                            recordsEl.innerHTML = data.answers.map(r => `
-                                <div class="record-item">${r.data}</div>
-                            `).join("");
-                        } else {
-                            recordsEl.innerHTML = `<div class="record-item" style="color: var(--text-muted); font-style: italic;">No records found (RCODE: ${data.rcode_name})</div>`;
+                        if (badge) {
+                            badge.className = "badge badge-error";
+                            badge.textContent = "Error";
                         }
+                        if (latencyEl) {
+                            latencyEl.textContent = `${data.time_ms} ms`;
+                            latencyEl.className = "latency slow";
+                        }
+                        if (rcodeEl) rcodeEl.textContent = "TIMEOUT";
+                        if (recordsEl) recordsEl.innerHTML = `<div class="record-item" style="color: var(--color-error);">${data.error}</div>`;
+                        states[res.ip] = 'error';
+                    } else {
+                        if (badge) {
+                            badge.className = "badge badge-success";
+                            badge.textContent = "Success";
+                        }
+                        if (latencyEl) {
+                            latencyEl.textContent = `${data.time_ms} ms`;
+                            latencyEl.className = data.time_ms < 120 ? "latency fast" : "latency slow";
+                        }
+                        if (rcodeEl) rcodeEl.textContent = data.rcode_name;
+
+                        if (recordsEl) {
+                            if (data.answers && data.answers.length > 0) {
+                                recordsEl.innerHTML = data.answers.map(r => `
+                                    <div class="record-item">${r.data}</div>
+                                `).join("");
+                            } else {
+                                recordsEl.innerHTML = `<div class="record-item" style="color: var(--text-muted); font-style: italic;">No records found (RCODE: ${data.rcode_name})</div>`;
+                            }
+                        }
+                        states[res.ip] = data.time_ms < 120 ? 'fast' : 'slow';
                     }
                 } catch (err) {
-                    card.classList.remove("running");
-                    badge.className = "badge badge-error";
-                    badge.textContent = "Failed";
-                    recordsEl.innerHTML = `<div class="record-item" style="color: var(--color-error);">API Request Failed</div>`;
+                    if (card) card.classList.remove("running");
+                    if (badge) {
+                        badge.className = "badge badge-error";
+                        badge.textContent = "Failed";
+                    }
+                    if (recordsEl) recordsEl.innerHTML = `<div class="record-item" style="color: var(--color-error);">API Request Failed</div>`;
+                    states[res.ip] = 'error';
                 }
+                updateMapMarkers(states);
             });
 
             await Promise.all(fetchQueue);
             btnResolve.disabled = false;
             btnResolve.querySelector("span").textContent = "Resolve Domain";
+            btnExport.disabled = false;
+            updateStats();
         }
+
+        // Export data
+        btnExport.onclick = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(queryResults, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `dns_propagation_report_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
 
         // Modal details
         function showDetails(ip) {
@@ -692,7 +1091,6 @@
             modalTitle.textContent = res ? `${res.name} (Query Result)` : "DNS Resolver Result";
             modalSubnet.textContent = `IP: ${ip} | Response Time: ${data.time_ms} ms | RCODE: ${data.rcode_name || 'UNKNOWN'}`;
 
-            // Helper to format detailed record JSON output
             const formatRecords = (records) => {
                 if (!records || records.length === 0) return "No records returned.";
                 return records.map(r => `[Name: ${r.name}] Type: ${r.type} | TTL: ${r.ttl} | Data: ${r.data}`).join("\n");
@@ -718,11 +1116,13 @@
         // Filter search list
         filterInput.oninput = () => {
             const query = filterInput.value.toLowerCase();
-            const cards = document.getElementsByClassName("resolver-card");
             activeResolvers.forEach((res, index) => {
                 const card = document.getElementById(`card-${index}`);
                 if (card) {
-                    const match = res.name.toLowerCase().includes(query) || res.ip.includes(query) || res.desc.toLowerCase().includes(query);
+                    const match = res.name.toLowerCase().includes(query) || 
+                                  res.ip.includes(query) || 
+                                  res.desc.toLowerCase().includes(query) ||
+                                  (res.country && res.country.toLowerCase().includes(query));
                     card.style.display = match ? "flex" : "none";
                 }
             });
