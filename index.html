@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
+            color-scheme: dark;
             --bg-color: #08090f;
             --panel-bg: rgba(20, 22, 37, 0.4);
             --panel-border: rgba(255, 255, 255, 0.08);
@@ -159,6 +160,11 @@
             box-shadow: 0 0 0 4px var(--accent-glow);
         }
 
+        select option {
+            background-color: #0f111a;
+            color: var(--text-main);
+        }
+
         .btn-check {
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             border: none;
@@ -217,7 +223,7 @@
 
         .resolver-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
             gap: 1.25rem;
             width: 100%;
         }
@@ -235,6 +241,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            min-width: 0;
         }
 
         .resolver-card:hover {
