@@ -546,29 +546,21 @@
     </div>
 
     <script>
-        const PUBLIC_RESOLVERS = [
-            { name: "Google Public DNS", ip: "8.8.8.8", desc: "Global Primary" },
-            { name: "Cloudflare Public DNS", ip: "1.1.1.1", desc: "Global Secondary" },
-            { name: "Quad9 Secure DNS", ip: "9.9.9.9", desc: "Security Filtered" },
-            { name: "OpenDNS Home", ip: "208.67.222.222", desc: "Family Friendly" },
-            { name: "AdGuard DNS", ip: "94.140.14.14", desc: "Ad & Tracker Blocker" },
-            { name: "Lumen / Level3", ip: "4.2.2.1", desc: "Carrier Backbone" },
-            { name: "ControlD Free", ip: "76.76.2.0", desc: "Customizable" },
-            { name: "Yandex DNS", ip: "77.88.8.8", desc: "Eastern Europe" },
-            { name: "Censurfridns", ip: "91.239.100.100", desc: "Denmark (Unfiltered)" },
-            { name: "Digitalcourage", ip: "46.38.225.230", desc: "Germany (Privacy)" },
-            { name: "FDN Resolvers", ip: "80.67.169.12", desc: "France (Non-profit)" },
-            { name: "XS4ALL", ip: "194.109.6.66", desc: "Netherlands ISP" },
-            { name: "CZ.NIC", ip: "217.31.204.130", desc: "Czech Republic" },
-            { name: "NASK", ip: "195.187.244.194", desc: "Poland Registry" },
-            { name: "GreenNet", ip: "81.187.96.109", desc: "United Kingdom" },
-            { name: "Sunet DNS", ip: "192.36.125.150", desc: "Sweden (Academic)" },
-            { name: "TIM Resolver", ip: "85.37.17.15", desc: "Italy ISP" },
-            { name: "Telefonica", ip: "80.58.61.250", desc: "Spain ISP" }
-        ];
-
-        let activeResolvers = [...PUBLIC_RESOLVERS];
+        let publicResolvers = [];
+        let activeResolvers = [];
         let queryResults = {};
+
+        async function loadResolvers() {
+            try {
+                const response = await fetch('/resolvers.json');
+                publicResolvers = await response.json();
+                activeResolvers = [...publicResolvers];
+                renderCards();
+            } catch (err) {
+                console.error("Failed to load resolvers:", err);
+                container.innerHTML = `<div style="color: var(--color-error); text-align: center; width: 100%; padding: 2rem;">Failed to load resolvers configuration file.</div>`;
+            }
+        }
 
         const container = document.getElementById("resolvers-container");
         const domainInput = document.getElementById("domain-input");
@@ -626,7 +618,7 @@
             }
 
             // Build dynamic resolver list
-            let targetResolvers = [...PUBLIC_RESOLVERS];
+            let targetResolvers = [...publicResolvers];
             if (customServer) {
                 targetResolvers = [{ name: "Custom User DNS", ip: customServer, desc: "User Defined" }, ...targetResolvers];
             }
@@ -739,7 +731,7 @@
         btnResolve.onclick = runQueries;
 
         // Initialize UI
-        renderCards();
+        loadResolvers();
     </script>
 </body>
 </html>

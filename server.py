@@ -207,6 +207,21 @@ class DNSDiagnosticHTTPHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(f"Error loading index.html: {e}".encode())
             return
             
+        # Serve resolvers.json
+        elif parsed_url.path == "/resolvers.json":
+            try:
+                with open("resolvers.json", "r", encoding="utf-8") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(content.encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Error loading resolvers.json: {e}"}).encode())
+            return
+            
         else:
             self.send_response(404)
             self.end_headers()
